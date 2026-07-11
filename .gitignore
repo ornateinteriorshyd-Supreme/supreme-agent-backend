@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+.env
+venv/
+env/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Memory (local only)
+long_term_memory.json
