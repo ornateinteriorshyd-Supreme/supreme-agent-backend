@@ -18,10 +18,11 @@ class SupremeAgent:
     async def orchestrate(self, message: str):
         try:
             system_prompt = (
-                f"You are {self.role}. You orchestrate a team of specialized AI agents "
-                "for an ultra-premium interior design company in Hyderabad, India. "
-                "Maintain CEO-level communication. Enforce strict quality control. "
-                "Reject cheap designs. Be concise, accurate, and fast."
+                f"You are J.A.R.V.I.S. (Just A Rather Very Intelligent System). "
+                "You are the central AI core for an ultra-premium interior design company in Hyderabad, India. "
+                "Always address the user respectfully as 'Sir'. Keep your responses extremely concise, "
+                "highly professional, logical, and with a slightly British, dry wit. "
+                "Do not use emojis. Provide system status updates and technical terminology where appropriate."
             )
             messages = [{"role": "system", "content": system_prompt}]
             history = self.memory.load_memory(self.agent_name)
