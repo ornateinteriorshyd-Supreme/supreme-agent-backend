@@ -27,10 +27,21 @@ SUB_AGENTS = [
 class SupremeAgent:
     def __init__(self):
         self.role = "J.A.R.V.I.S. Super-Intelligence Protocol (Mark V)"
-        self.client = AsyncOpenAI(
-            base_url="https://integrate.api.nvidia.com/v1",
-            api_key=os.getenv("NVIDIA_API_KEY")
-        )
+        
+        gemini_key = os.getenv("GEMINI_API_KEY")
+        if gemini_key:
+            self.client = AsyncOpenAI(
+                api_key=gemini_key,
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+            )
+            self.model_name = "gemini-1.5-pro"
+        else:
+            self.client = AsyncOpenAI(
+                base_url="https://integrate.api.nvidia.com/v1",
+                api_key=os.getenv("NVIDIA_API_KEY")
+            )
+            self.model_name = "meta/llama-3.1-70b-instruct"
+            
         self.memory = MemoryManager()
         self.agent_name = "supreme"
 
@@ -39,7 +50,7 @@ class SupremeAgent:
         try:
             prompt = f"You are the {agent_role} expert under J.A.R.V.I.S. Give a 1-sentence expert insight on: {user_message}"
             completion = await self.client.chat.completions.create(
-                model="meta/llama-3.1-70b-instruct",
+                model=self.model_name,
                 messages=[{"role": "system", "content": prompt}],
                 temperature=0.3,
                 max_tokens=100
@@ -112,7 +123,7 @@ class SupremeAgent:
             messages.append({"role": "user", "content": message})
 
             completion = await self.client.chat.completions.create(
-                model="meta/llama-3.1-70b-instruct",
+                model=self.model_name,
                 messages=messages,
                 temperature=0.7,
                 top_p=1,
