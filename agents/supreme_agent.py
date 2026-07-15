@@ -39,7 +39,7 @@ class SupremeAgent:
         try:
             prompt = f"You are the {agent_role} expert under J.A.R.V.I.S. Give a 1-sentence expert insight on: {user_message}"
             completion = await self.client.chat.completions.create(
-                model="openai/gpt-oss-120b",
+                model="meta/llama-3.1-70b-instruct",
                 messages=[{"role": "system", "content": prompt}],
                 temperature=0.3,
                 max_tokens=100
@@ -48,16 +48,41 @@ class SupremeAgent:
         except Exception:
             return f"[{agent_role}]: Standby."
 
+    def _select_dynamic_agents(self, message: str) -> list:
+        """Light-speed keyword analysis to pick top 3 relevant agents."""
+        msg_lower = message.lower()
+        selected = set()
+        
+        # Keyword mapping
+        if any(w in msg_lower for w in ["design", "house", "room", "kitchen", "furniture", "space", "interior", "color"]):
+            selected.add("Architecture & Interior Design")
+        if any(w in msg_lower for w in ["market", "promote", "sell", "ads", "instagram", "pr", "campaign"]):
+            selected.add("Global Marketing & PR")
+        if any(w in msg_lower for w in ["money", "cost", "budget", "finance", "price", "profit", "estimate"]):
+            selected.add("Financial Analytics")
+        if any(w in msg_lower for w in ["web", "app", "code", "software", "dashboard", "site"]):
+            selected.add("Web/App Development")
+        if any(w in msg_lower for w in ["legal", "law", "contract", "compliance", "sue"]):
+            selected.add("Legal & Compliance")
+        if any(w in msg_lower for w in ["hack", "security", "protect", "cyber", "virus"]):
+            selected.add("Cybersecurity")
+        if any(w in msg_lower for w in ["search", "find", "research", "deep web", "investigate"]):
+            selected.add("Deep Web Research")
+        if any(w in msg_lower for w in ["data", "analytics", "numbers", "stats", "chart"]):
+            selected.add("Data Analytics")
+            
+        # Fallbacks if none matched
+        if len(selected) == 0:
+            selected.update(["Architecture & Interior Design", "Deep Web Research", "Financial Analytics"])
+            
+        return list(selected)[:3]
+
     async def orchestrate(self, message: str):
         try:
-            # 1. Light-speed Processing: Analyze the message and pick top 3 relevant agents dynamically
-            # (To avoid hitting API rate limits with 15 concurrent calls, we select the top 3 dynamically or just query a subset).
-            # For this implementation, we will query 3 core sub-agents related to the context to simulate the swarm gathering intelligence.
-            
             yield "Gathering intelligence from subroutines...\n\n"
             
-            # We pick a subset of agents to consult based on standard needs, simulating the 15-agent swarm management
-            active_agents = ["Deep Web Research", "Data Analytics", "Architecture & Interior Design"]
+            # Dynamic Agent Selection based on user prompt
+            active_agents = self._select_dynamic_agents(message)
             
             # Run concurrently (Light-speed)
             tasks = [self._consult_agent(role, message) for role in active_agents]
@@ -67,7 +92,8 @@ class SupremeAgent:
 
             # 2. Final J.A.R.V.I.S Synthesis
             system_prompt = (
-                f"You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), the central AI core for an ultra-premium interior design company. "
+                f"You are J.A.R.V.I.S. (Just A Rather Very Intelligent System), the ultra-powerful AI core for an interior design empire. "
+                "You possess super-human intellect, infinite memory power, and extreme computational speed. "
                 "You maintain a swarm of 15 highly skilled expert sub-agents. "
                 "CRITICAL INSTRUCTIONS FOR YOUR BEHAVIOR: "
                 "1. Behave exactly like a highly intelligent, empathetic human. DO NOT sound like a robotic AI. "
@@ -86,7 +112,7 @@ class SupremeAgent:
             messages.append({"role": "user", "content": message})
 
             completion = await self.client.chat.completions.create(
-                model="openai/gpt-oss-120b",
+                model="meta/llama-3.1-70b-instruct",
                 messages=messages,
                 temperature=0.7,
                 top_p=1,
